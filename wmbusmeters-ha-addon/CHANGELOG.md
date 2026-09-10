@@ -1,3 +1,5 @@
+## 3.0.1 
+- Version scheme changed: Home Assistant compares add-on versions with AwesomeVersion, which does not treat `3.0.0-RC1-3` as newer than `3.0.0-RC1-2`, so the Update button in the update dialog stayed disabled. Fork releases now use plain semver (stable) / `3.0.0.<edge-build>.<fork-rev>` (edge)
 ## 3.0.0-RC1-3 
 - Sidebar panel title shortened to `Wmbusmeters` (`panel_title`)
 ## 3.0.0-RC1-2 
