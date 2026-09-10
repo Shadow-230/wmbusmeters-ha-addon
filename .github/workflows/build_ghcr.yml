@@ -1,0 +1,65 @@
+name: Build add-on images (GHCR)
+
+# Builds both add-on channels for amd64 and aarch64 on native runners and
+# pushes them to ghcr.io/<owner>/<arch>-wmbusmeters-ha-addon[-edge]:<version>.
+# The <version> tag is taken from each add-on's config.json, so bump it there
+# to make Home Assistant offer the update.
+
+on:
+  push:
+    paths:
+      - "wmbusmeters-ha-addon/**"
+      - "wmbusmeters-ha-addon-edge/**"
+      - ".github/workflows/build_ghcr.yml"
+  workflow_dispatch:
+
+env:
+  BASE_IMAGE_VERSION: "3.23"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.addon }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write # Cosign signing
+      packages: write # push to GHCR
+    strategy:
+      fail-fast: false
+      matrix:
+        addon: ["wmbusmeters-ha-addon", "wmbusmeters-ha-addon-edge"]
+        arch: ["amd64", "aarch64"]
+        include:
+          - arch: amd64
+            os: ubuntu-24.04
+          - arch: aarch64
+            os: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read add-on version and image name
+        id: meta
+        run: |
+          version=$(jq -r '.version' "${{ matrix.addon }}/config.json")
+          owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${owner}/${{ matrix.arch }}-${{ matrix.addon }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image
+        uses: home-assistant/builder/actions/build-image@2026.06.0
+        with:
+          arch: ${{ matrix.arch }}
+          context: ${{ matrix.addon }}
+          image: ${{ steps.meta.outputs.image }}
+          image-tags: |
+            ${{ steps.meta.outputs.version }}
+            latest
+          version: ${{ steps.meta.outputs.version }}
+          build-args: |
+            BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:${{ env.BASE_IMAGE_VERSION }}
+          cache-gha-scope: ${{ matrix.addon }}-${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          push: "true"
