@@ -1,3 +1,6 @@
+## 3.0.0-53-1 
+- Security: meter encryption keys are no longer printed to the add-on log at startup, and `key` / MQTT `password` fields are masked in the configuration UI (with a Show/Hide toggle)
+- Images are now built by GitHub Actions and published to GHCR (`ghcr.io/shadow-230`)
 ## 3.0.0-53 
 - Updated to version [3.0.0-53](https://github.com/wmbusmeters/wmbusmeters/commits/master)
 ## 3.0.0-52 

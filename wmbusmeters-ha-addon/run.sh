@@ -20,10 +20,13 @@ CONFIG_DATA_PATH=$(bashio::jq "${CONFIG_PATH}" '.data_path')
 CONFIG_CONF=$(bashio::jq "${CONFIG_PATH}" '.conf')
 CONFIG_METERS=$(bashio::jq "${CONFIG_PATH}" '.meters')
 
+# Never print secrets (meter encryption keys) to the add-on log
+CONFIG_METERS_REDACTED=$(echo "${CONFIG_METERS}" | jq 'map(if has("key") and (.key|tostring) != "" then .key = "<redacted>" else . end)')
+
 bashio::log.info "CONFIG_CONF ..."
 bashio::log.info "${CONFIG_CONF}"
 bashio::log.info "CONFIG_METERS ..."
-bashio::log.info "${CONFIG_METERS}"
+bashio::log.info "${CONFIG_METERS_REDACTED}"
 
 bashio::log.info "Syncing wmbusmeters configuration ..."
 if ! bashio::fs.directory_exists "${CONFIG_DATA_PATH}/logs/meter_readings"; then
@@ -122,7 +125,8 @@ EOL
     /mqtt_discovery.sh ${pub_args[@]} -c $CONFIG_PATH -w $CONFIG_DATA_PATH || true
 fi
 
-chmod a+x /wmbusmeters/mosquitto_pub.sh
+# script contains MQTT credentials - keep it readable by root only
+chmod 700 /wmbusmeters/mosquitto_pub.sh
 
 bashio::log.info "Running wmbusmeters ..."
 if pgrep wmbusmeters > /dev/null; then
