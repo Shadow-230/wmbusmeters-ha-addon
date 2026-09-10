@@ -1,3 +1,29 @@
+// Fields whose values must never be shown in clear text by default
+const SECRET_KEYS = ['key', 'password'];
+
+function isSecretKey(name) {
+  return SECRET_KEYS.includes(String(name).trim().toLowerCase());
+}
+
+// Renders a value input, masked when the key name denotes a secret, plus a Show/Hide toggle
+function renderValueInput(cls, keyName = '', value = '') {
+  const secret = isSecretKey(keyName);
+  return `<input class="${cls} form-control" value="${value}" type="${secret ? 'password' : 'text'}" autocomplete="off" required>
+          <button class="toggle-secret btn btn-outline-secondary" type="button"${secret ? '' : ' hidden'}>Show</button>`;
+}
+
+// Re-evaluate masking when the key name of a pair is edited
+function refreshSecretInput(keyInput) {
+  const pair = keyInput.parentNode;
+  const valueInput = pair.querySelector('.section-value, .mqtt-value');
+  const toggle = pair.querySelector('.toggle-secret');
+  if (!valueInput || !toggle) return;
+  const secret = isSecretKey(keyInput.value);
+  valueInput.type = secret ? 'password' : 'text';
+  toggle.hidden = !secret;
+  toggle.textContent = 'Show';
+}
+
 function renderJsonPair(key = '', value = '') {
 
   const newPair = document.createElement('div');
@@ -80,7 +106,7 @@ window.addEventListener('load', () => {
                     <div class="input-group mb-3">
                         <input class="mqtt-key form-control" type="text" value="${keys[i]}" required>
                         <span class="input-group-text">=</span>
-                        <input class="mqtt-value form-control" value="${values[i]}" type="text" required>
+                        ${renderValueInput('mqtt-value', keys[i], values[i])}
                     </div>`;
     }
     newMqtt.id = 'mqtt_input';
@@ -132,7 +158,7 @@ window.addEventListener('load', () => {
                 <div class="json-pair input-group mb-3">
                     <input class="section-key form-control" value="${keys[i]}" type="text" required>
                     <span class="input-group-text">=</span>
-                    <input class="section-value form-control" value="${values[i]}" type="text" required>
+                    ${renderValueInput('section-value', keys[i], values[i])}
                     <button class="delete-pair btn btn-outline-danger" type="button">Delete</button>
                 </div>`;
     }
@@ -141,6 +167,22 @@ window.addEventListener('load', () => {
     document.getElementById('sections').appendChild(newSection);
 
   };
+  // show/hide a masked secret value
+  document.addEventListener('click', event => {
+    if (event.target && event.target.classList.contains('toggle-secret')) {
+      const valueInput = event.target.parentNode.querySelector('.section-value, .mqtt-value');
+      if (!valueInput) return;
+      const reveal = valueInput.type === 'password';
+      valueInput.type = reveal ? 'text' : 'password';
+      event.target.textContent = reveal ? 'Hide' : 'Show';
+    }
+  });
+  // mask the value as soon as a pair is named "key" or "password"
+  document.addEventListener('input', event => {
+    if (event.target && (event.target.classList.contains('section-key') || event.target.classList.contains('mqtt-key'))) {
+      refreshSecretInput(event.target);
+    }
+  });
   // delete a section
   document.addEventListener('click', event => {
     if (event.target && event.target.classList.contains('delete-section')) {
@@ -155,7 +197,7 @@ window.addEventListener('load', () => {
       newPair.className = 'json-pair input-group mb-3';
       newPair.innerHTML = `<input class="section-key form-control" type="text" required>
                                  <span class="input-group-text">=</span>
-                                 <input class="section-value form-control" type="text" required>
+                                 ${renderValueInput('section-value')}
                                  <button class="delete-pair btn btn-outline-danger">Delete</button>`;
       event.target.parentNode.insertBefore(newPair, event.target);
     }

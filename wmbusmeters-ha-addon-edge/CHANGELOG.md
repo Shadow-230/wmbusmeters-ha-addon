@@ -1,4 +1,5 @@
 ## 3.0.0-53 
+- Security: meter encryption keys are no longer printed to the add-on log at startup, and `key` / MQTT `password` fields are masked in the configuration UI (with a Show/Hide toggle)
 - Updated to version [3.0.0-53](https://github.com/wmbusmeters/wmbusmeters/commits/master)
 ## 3.0.0-52 
 - Updated to version [3.0.0-52](https://github.com/wmbusmeters/wmbusmeters/commits/master)
