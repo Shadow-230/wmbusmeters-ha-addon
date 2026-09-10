@@ -226,9 +226,8 @@ window.addEventListener('load', () => {
     popup.style.left = '50%';
     popup.style.transform = 'translate(-50%, -50%)';
     popup.style.padding = '20px';
-    popup.style.border = '1px solid #ccc';
-    popup.style.background = '#fff';
     popup.style.zIndex = '9999';
+    popup.className = 'bg-body text-body border rounded shadow';
 
     const message = document.createElement('p');
     message.innerHTML = message_text;
