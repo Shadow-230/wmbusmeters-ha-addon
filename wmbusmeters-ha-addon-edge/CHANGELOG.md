@@ -2,6 +2,7 @@
 - Version scheme changed: Home Assistant compares add-on versions with AwesomeVersion, which does not treat `3.0.0-RC1-3` as newer than `3.0.0-RC1-2`, so the Update button in the update dialog stayed disabled. Fork releases now use plain semver (stable) / `3.0.0.<edge-build>.<fork-rev>` (edge)
 ## 3.0.0-53-3 
 - Sidebar panel title shortened to `Wmbusmeters` (`panel_title`)
+  _Note: Home Assistant does not refresh an existing sidebar entry after a title change. Toggle "Show in sidebar" off and on in the add-on settings._
 ## 3.0.0-53-2 
 - Web UI: light/dark theme with a toggle in the navigation bar (follows the system preference by default)
 - Web UI: Logs tab now opens the add-on log from every page (all tabs used to link to different, partly outdated, Home Assistant paths)
