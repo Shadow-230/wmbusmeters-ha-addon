@@ -1,3 +1,5 @@
+## 3.0.0-53-3 
+- Sidebar panel title shortened to `Wmbusmeters` (`panel_title`)
 ## 3.0.0-53-2 
 - Web UI: light/dark theme with a toggle in the navigation bar (follows the system preference by default)
 - Web UI: Logs tab now opens the add-on log from every page (all tabs used to link to different, partly outdated, Home Assistant paths)
